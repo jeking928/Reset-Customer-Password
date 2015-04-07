@@ -27,17 +27,17 @@
   $searchemail = (isset($_POST['email']) ? $_POST['email'] : '');
   $searchemail = zen_db_prepare_input($searchemail);
   $passchangeCust = (DB_PREFIX.'customers');
+  $customers_id = (isset($_GET['cID']) ? zen_db_prepare_input($_GET['cID']) : '');
 
   if (zen_not_null($action)) {
     switch ($action) {
       case 'save':
-        $customers_id       = zen_db_prepare_input($_GET['cID']);
         $customers_password = zen_db_prepare_input($_POST['customers_password']);
         $db->Execute("UPDATE $passchangeCust  
                       SET customers_password = concat(md5(concat(substring(md5('" . $customers_password . "'),1,2) , '" . $customers_password . "')) , ':' , substring(md5('" . $customers_password . "'),1,2))
                       WHERE customers_id = '" . $customers_id . "' LIMIT 1;
                      ");
-        zen_redirect(zen_href_link(FILENAME_PASSCHANGE, 'page=' . $_GET['page'] . '&cID=' . $customers_id));
+        zen_redirect(zen_href_link(FILENAME_PASSCHANGE, 'page=' . $_GET['page']));
         break;
     }
   }
@@ -96,6 +96,8 @@
 <?php
  if ($searchemail){
 		$passchange_query_raw = "select customers_id, customers_lastname, customers_firstname, customers_email_address from $passchangeCust WHERE customers_email_address='$searchemail'";
+  }elseif ($customers_id){
+		$passchange_query_raw = "select customers_id, customers_lastname, customers_firstname, customers_email_address from $passchangeCust WHERE customers_id='$customers_id'";
   }else{
 		$passchange_query_raw = "select customers_id, customers_lastname, customers_firstname, customers_email_address from $passchangeCust order by customers_id";
   }
@@ -140,7 +142,7 @@
       $contents[] = array('text'  => '<br /><b><font color="#0000FF">&nbsp;&nbsp;'.PASSCHANGE_CUSTOMERS_NAME_BOX.'</font></b><br />&nbsp;&nbsp;' . $cInfo->customers_lastname . ' ' . $cInfo->customers_firstname . '');
       $contents[] = array('text'  => '<br /><b><font color="#0000FF">&nbsp;&nbsp;'.PASSCHANGE_CUSTOMERS_EMAIL_BOX.'</font></b><br />&nbsp;&nbsp;' . $cInfo->customers_email_address . '');
       $contents[] = array('text'  => '<br /><b><font color="#0000FF">&nbsp;&nbsp;'.PASSCHANGE_CUSTOMERS_NEW_PASSWORD_BOX.'</font></b><br />&nbsp;&nbsp;' . zen_draw_input_field('customers_password', ''));
-      $contents[] = array('align' => 'center', 'text' => '<br />' . zen_image_submit('button_update.gif', IMAGE_UPDATE) . '&nbsp;<a href="' . zen_href_link(FILENAME_PASSCHANGE, 'page=' . $_GET['page'] . '&cID=' . $cInfo->customers_id) . '">' . zen_image_button('button_cancel.gif', IMAGE_CANCEL) . '</a>');
+      $contents[] = array('align' => 'center', 'text' => '<br />' . zen_image_submit('button_update.gif', IMAGE_UPDATE) . '&nbsp;<a href="' . zen_href_link(FILENAME_PASSCHANGE, 'page=' . $_GET['page'] ) . '">' . zen_image_button('button_cancel.gif', IMAGE_CANCEL) . '</a>');
       break;
     default:
       if (is_object($cInfo)) {
